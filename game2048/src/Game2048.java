@@ -1,11 +1,9 @@
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.util.*;
-import javax.swing.*;
+
+import javax.swing.*;   
+import java.awt.Font;  
 
 @SuppressWarnings("serial")
 public class Game2048 extends JFrame {
@@ -22,7 +20,11 @@ public class Game2048 extends JFrame {
     final public static int BUTTON_NEW_GAME = 0xf30;
     final public static int BUTTON_ABOUT = 0xf28;
     final public static int BUTTON_EXIT = 0xf27;
-
+    
+    long Start;//记录开始时间
+    long elapsed;//记录总用时
+    int  minute, second, milli;//记录所用分，秒，毫秒  
+    PlaySounds play=new PlaySounds("d:\\press.wav"); //播放点击音效的类
     /**
      * 行
      */
@@ -38,7 +40,7 @@ public class Game2048 extends JFrame {
     /**
      * 网格集
      */
-    private HashMap<Point, Cube>  viewList = new HashMap<>();
+    private HashMap<Point, Cube> viewList = new HashMap<>();
     /**
      * 计分板
      */
@@ -61,20 +63,25 @@ public class Game2048 extends JFrame {
      * 
      * @param args
      */
+    
+    private JMenuItem timer;
+    
     public static void main(String[] args) {
-        Game2048 game = new Game2048(400, 500);
-        game.setTitle("2048");
-        game.setLocationRelativeTo(null);
-        game.setVisible(true);
-        game.newGame();
+    	Test2 t2=new Test2();//主界面
+    	t2.mainFace();
+//        Game2048 game = new Game2048(400, 400);
+//        game.setTitle("2048");
+//        game.setLocationRelativeTo(null);
+//        game.setVisible(true);
+//        game.newGame();
     }
 
     /**
      * 构造一个默认大小的界面
      */
-    public Game2048() {
-        this(400, 500);
-    }
+//    public Game2048() {
+//        this(400, 400);
+//    }
 
     /**
      * 构造一个指定宽高的界面
@@ -100,6 +107,8 @@ public class Game2048 extends JFrame {
                 this.add(getView(i, j).getView());
             }
         }
+        
+
 
         // 设置按键监听
         this.addKeyListener(new MyKeyListener(this));
@@ -107,7 +116,8 @@ public class Game2048 extends JFrame {
         JMenuBar jmb = new JMenuBar();
         JMenu jm = new JMenu("游戏");
         JMenuItem item1 = new JMenuItem("新游戏");
-        item1.addMouseListener(new MyMouseListener(this,Game2048.BUTTON_NEW_GAME));
+        item1.addMouseListener(new MyMouseListener(this,
+                Game2048.BUTTON_NEW_GAME));
         JMenuItem item2 = new JMenuItem("退出");
         item2.addMouseListener(new MyMouseListener(this, Game2048.BUTTON_EXIT));
         jm.add(item1);
@@ -120,13 +130,17 @@ public class Game2048 extends JFrame {
 
         scoreBoard = new JMenuItem();
         arithmometer = new JMenuItem();
+        timer=new JMenuItem();
 
         jmb.add(jm);
         jmb.add(jm2);
         jmb.add(scoreBoard);
         jmb.add(arithmometer);
+        jmb.add(timer);
         this.setJMenuBar(jmb);
     }
+    
+
 
     /**
      * 向上移动
@@ -336,8 +350,23 @@ public class Game2048 extends JFrame {
         } else {
             gameState = state;
         }
+        
+       	 play.run();//播放音效
 
         scoreBoard.setText("得分:" + score);
+        elapsed = System.currentTimeMillis()-Start;  
+        
+        //计算时间
+        milli = (int) (elapsed % 1000);  
+        elapsed = elapsed / 1000;  
+
+        second = (int) (elapsed % 60);  
+        elapsed = elapsed / 60;  
+
+        minute = (int) (elapsed % 60);  
+        //elapsed = elapsed / 60;  
+
+        timer.setText("用时:"+minute+"'"+second+"''"+milli+"'''");
 
     }
 
@@ -374,6 +403,8 @@ public class Game2048 extends JFrame {
         arithmometer.setText("计步：" + count);
         gameLv = 0;
         this.setTitle("2048");
+        timer.setText("  用时:0'0''0'''");
+        Start = System.currentTimeMillis();  
     }
 
     /**
@@ -390,6 +421,7 @@ public class Game2048 extends JFrame {
         } else {
             initialise();
         }
+      
     }
 
     /**
@@ -422,10 +454,72 @@ public class Game2048 extends JFrame {
      * 关于
      */
     public void about() {
-        JOptionPane.showMessageDialog(null, "E-mail:**********");
+        JOptionPane.showMessageDialog(null, "Address:一教A108三号桌");
     }
 }
 
+class Cube {
+    private int num;
+    private JButton btn;
+    private boolean isAdded;
 
+    /**
+     * 构造一个方块
+     */
+    public Cube() {
+        btn = new JButton();
+        btn.setFont(new Font("微软雅黑", Font.BOLD, 24));
+        btn.setEnabled(false);
+        num = 0;
+        isAdded = false;
+    }
 
+    /**
+     * 设置文本内容
+     * 
+     * @param n
+     *            数值
+     */
+    public void setText(int n) {
+        num = n;
+        btn.setText(n != 0 ? n + "" : "");
+    }
 
+    /**
+     * 获取控件
+     * 
+     * @return JButton
+     */
+    public JButton getView() {
+        return btn;
+    }
+
+    /**
+     * 获取数值
+     * 
+     * @return int
+     */
+    public int getNum() {
+        return num;
+    }
+
+    /**
+     * 是否是相加而成 限当前移动次有效,移动结束后改回默认值-false
+     * 
+     * @return
+     */
+    public boolean isAdded() {
+        return isAdded;
+    }
+
+    /**
+     * 修改生成方式
+     * 
+     * @param b
+     *            true-相加而成
+     */
+    public void setIsAdded(boolean b) {
+        isAdded = b;
+    }
+
+}
