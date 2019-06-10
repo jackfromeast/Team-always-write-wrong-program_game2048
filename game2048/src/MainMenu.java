@@ -1,32 +1,27 @@
 import java.awt.*;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.*;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JTextArea;
-
-public class Test2{
+public class MainMenu{
 	Game2048 game;
-	public Test2() {}
 	JFrame frame; //主界面框架
 	//主界面函数
 	public void mainFace() {
 		frame=new JFrame("主界面");
 		frame.setLayout(new BorderLayout());
-		JButton b1=new JButton("新游戏");
+		JButton b1=new JButton();
+		b1.setText("新游戏");
+		b1.setFont(new Font("宋体",1,20));
 		b1.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				frame.dispose(); //主界面关闭
 				game=new Game2048(400,400);
 				game.setTitle("2048");
 				game.setLocationRelativeTo(null);
 		        game.setVisible(true);
-		        game.newGame();
-				frame.dispose(); //主界面关闭
+		        game.newGame();	
 			}
 		});
 		
@@ -59,6 +54,7 @@ public class Test2{
 	
 	public void otherFace() {
 		final JFrame oframe=new JFrame("about");
+	
 		oframe.setLayout(new BorderLayout());
 		
 		JTextArea displayArea=new JTextArea();
@@ -73,9 +69,9 @@ public class Test2{
 		oframe.add(notes,BorderLayout.NORTH);
 		notes.setFont(new Font("微软雅黑",Font.BOLD,10));
 		notes.setForeground(Color.black);
-		notes.append("\t\t抵制不良游戏，拒绝盗版游戏\n"
-				+ "\t\t适度游戏益脑，过度游戏伤身");
-		
+		notes.append("\t  抵制不良游戏，拒绝盗版游戏\n"
+				+ "\t  适度游戏益脑，过度游戏伤身");
+
 		JButton button1=new JButton("返回主界面");
 		oframe.add(button1,BorderLayout.SOUTH);
 		button1.addActionListener(new ActionListener() {
