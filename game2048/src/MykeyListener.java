@@ -1,6 +1,5 @@
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-
 import javax.swing.JOptionPane;
 
 class MyKeyListener implements KeyListener {
@@ -18,7 +17,7 @@ class MyKeyListener implements KeyListener {
     final public static int KEY_RIGHT = 0xf27;
 
     private Game2048 game;
-
+    
     /**
      * 构造一个键盘监听器
      * 
@@ -28,7 +27,7 @@ class MyKeyListener implements KeyListener {
     public MyKeyListener(Game2048 game) {
         this.game = game;
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode() + 0xf00;
@@ -64,8 +63,10 @@ class MyKeyListener implements KeyListener {
             break;
 
         case Game2048.GAME_OVER: {
+        	float time=game.getTime()/1000;
+        	float n=(float)(Math.round((game.getCount()/time)*100)/100);
             int jop = JOptionPane
-                    .showConfirmDialog(null, "很遗憾，你没能达成本次目标，是否开启新游戏?", "游戏结束",
+                    .showConfirmDialog(null, "很遗憾，你没能达成本次目标，你的平均下手速度为"+n+"步/s"+"\n是否开启新游戏?","游戏结束",
                             JOptionPane.YES_NO_OPTION);
 
             if (jop == JOptionPane.YES_OPTION) {
@@ -75,8 +76,10 @@ class MyKeyListener implements KeyListener {
             break;
 
         case Game2048.GAME_WIN: {
+        	float time=game.getTime()/1000;
+        	float n=(float)(Math.round((game.getCount()/time)*100)/100);
             int jop = JOptionPane.showConfirmDialog(null,
-                    "你已完成本次目标:" + game.getTitle() + ",是否进入更高难度游戏?", "恭喜晋级",
+                    "你已完成本次目标:" + game.getTitle() + "\n你的平均下手速度为" +n+"步/s"+"\n是否进入更高难度游戏?", "恭喜晋级",
                     JOptionPane.YES_NO_OPTION);
 
             if (jop == JOptionPane.YES_OPTION) {
@@ -97,4 +100,3 @@ class MyKeyListener implements KeyListener {
 
     }
 }
-

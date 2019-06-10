@@ -1,13 +1,15 @@
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.util.*;
-
-import javax.swing.*;   
-import java.awt.Font;  
+import javax.swing.*;
 
 @SuppressWarnings("serial")
 public class Game2048 extends JFrame {
-    // 移动方向
+    // 记录各个移动方向移动的格数，初始化为十六进制
     final public static int MOVE_UP = 0xf37;
     final public static int MOVE_DOWN = 0xf36;
     final public static int MOVE_LEFT = 0xf35;
@@ -20,55 +22,38 @@ public class Game2048 extends JFrame {
     final public static int BUTTON_NEW_GAME = 0xf30;
     final public static int BUTTON_ABOUT = 0xf28;
     final public static int BUTTON_EXIT = 0xf27;
-    
-    long Start;//记录开始时间
-    long elapsed;//记录总用时
-    int  minute, second, milli;//记录所用分，秒，毫秒  
-    PlaySounds play=new PlaySounds("d:\\press.wav");
-    /**
-     * 行
-     */
+
+    //行数
     private int column;
-    /**
-     * 列
-     */
+    //列数
     private int row;
-    /**
-     * 游戏状态
-     */
+    //游戏状态
     private int gameState;
-    /**
-     * 网格集
-     */
-    private HashMap<Point, Cube> viewList = new HashMap<>();
-    /**
-     * 计分板
-     */
+    //网格集
+    private HashMap<Point, Cube>  viewList = new HashMap<>();
+    //记分板
     private JMenuItem scoreBoard;
-    /**
-     * 计步器
-     */
+    //计步器
     private JMenuItem arithmometer;
-    /**
-     * 计步
-     */
+    //步数
     private int count;
-    /**
-     * 新游戏加流程
-     */
+    //游戏难度
     private int gameLv;
 
-    /**
-     * main函数
-     * 
-     * @param args
-     */
-    
-    private JMenuItem timer;
-    
+
     public static void main(String[] args) {
-    	MainMenu mm=new MainMenu();
-    	mm.mainFace();
+        Game2048 game = new Game2048(400, 400);
+        game.setTitle("2048");
+        game.setLocationRelativeTo(null);
+        game.setVisible(true);
+        game.newGame();
+    }
+
+    /**
+     * 构造默认大小的界面
+     */
+    public Game2048() {
+        this(400, 400);
     }
 
     /**
@@ -85,6 +70,7 @@ public class Game2048 extends JFrame {
 
         this.setLayout(new GridLayout(row, column));
         // 事件监听
+
         enableEvents(AWTEvent.WINDOW_EVENT_MASK);
         this.setSize(width, height);
 
@@ -99,11 +85,11 @@ public class Game2048 extends JFrame {
         // 设置按键监听
         this.addKeyListener(new MyKeyListener(this));
 
+        //设定界面具体分布
         JMenuBar jmb = new JMenuBar();
         JMenu jm = new JMenu("游戏");
         JMenuItem item1 = new JMenuItem("新游戏");
-        item1.addMouseListener(new MyMouseListener(this,
-                Game2048.BUTTON_NEW_GAME));
+        item1.addMouseListener(new MyMouseListener(this,Game2048.BUTTON_NEW_GAME));
         JMenuItem item2 = new JMenuItem("退出");
         item2.addMouseListener(new MyMouseListener(this, Game2048.BUTTON_EXIT));
         jm.add(item1);
@@ -116,16 +102,14 @@ public class Game2048 extends JFrame {
 
         scoreBoard = new JMenuItem();
         arithmometer = new JMenuItem();
-        timer=new JMenuItem();
-
+        //将设置好的按钮加入主界面
         jmb.add(jm);
         jmb.add(jm2);
         jmb.add(scoreBoard);
         jmb.add(arithmometer);
-        jmb.add(timer);
         this.setJMenuBar(jmb);
     }
-   
+
     /**
      * 向上移动
      */
@@ -135,14 +119,14 @@ public class Game2048 extends JFrame {
                 move(Game2048.MOVE_UP, x, i, true);
             }
         }
-
+        //界面显示
         createCube();
         for (int x = 1; x < row; x++) {
             for (int i = 0; i < column; i++) {
                 move(Game2048.MOVE_UP, x, i, false);
             }
         }
-        addCount();
+        addCount();//增加步数
     }
 
     /**
@@ -154,14 +138,14 @@ public class Game2048 extends JFrame {
                 move(Game2048.MOVE_DOWN, x, y, true);
             }
         }
-
+        //界面显示
         createCube();
         for (int x = row - 2; x >= 0; x--) {
             for (int y = 0; y < column; y++) {
                 move(Game2048.MOVE_DOWN, x, y, false);
             }
         }
-
+        //增加步数
         addCount();
     }
 
@@ -174,14 +158,14 @@ public class Game2048 extends JFrame {
                 move(Game2048.MOVE_LEFT, x, y, true);
             }
         }
-
+        //界面显示
         createCube();
         for (int y = 1; y < column; y++) {
             for (int x = 0; x < row; x++) {
                 move(Game2048.MOVE_LEFT, x, y, false);
             }
         }
-
+        //增加步数
         addCount();
     }
 
@@ -194,14 +178,14 @@ public class Game2048 extends JFrame {
                 move(Game2048.MOVE_RIGHT, x, y, true);
             }
         }
-
+        //界面显示
         createCube();
         for (int y = column - 2; y >= 0; y--) {
             for (int x = 0; x < row; x++) {
                 move(Game2048.MOVE_RIGHT, x, y, false);
             }
         }
-
+        //增加步数
         addCount();
     }
 
@@ -334,27 +318,9 @@ public class Game2048 extends JFrame {
         } else {
             gameState = state;
         }
-        
-       	 play.run();
 
         scoreBoard.setText("得分:" + score);
-        elapsed = System.currentTimeMillis()-Start;  
-        long use=elapsed;
-        
-        milli = (int) (use % 1000);  
-        use = use / 1000;  
 
-        second = (int) (use % 60);  
-        use = use / 60;  
-
-        minute = (int) (use % 60);    
-
-        timer.setText("用时:"+minute+"'"+second+"''"+milli+"'''");
-
-    }
-    
-    public long getTime() {
-    	return elapsed;
     }
 
     /**
@@ -363,10 +329,6 @@ public class Game2048 extends JFrame {
     private void addCount() {
         count++;
         arithmometer.setText("计步：" + count);
-    }
-    
-    public int getCount(){
-    	return count;
     }
 
     /**
@@ -394,8 +356,6 @@ public class Game2048 extends JFrame {
         arithmometer.setText("计步：" + count);
         gameLv = 0;
         this.setTitle("2048");
-        timer.setText("  用时:0'0''0'''");
-        Start = System.currentTimeMillis();  
     }
 
     /**
@@ -412,11 +372,10 @@ public class Game2048 extends JFrame {
         } else {
             initialise();
         }
-      
     }
 
     /**
-     * 重载窗体事件-控制关闭
+     * 重载窗口关闭
      */
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
@@ -445,6 +404,10 @@ public class Game2048 extends JFrame {
      * 关于
      */
     public void about() {
-        JOptionPane.showMessageDialog(null, "Address:一教A108三号桌");
+        JOptionPane.showMessageDialog(null, "川大路二段江安一教A108三号卓");
     }
 }
+
+
+
+
